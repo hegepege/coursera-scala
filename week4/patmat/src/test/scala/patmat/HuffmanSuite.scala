@@ -9,10 +9,11 @@ import patmat.Huffman._
 
 @RunWith(classOf[JUnitRunner])
 class HuffmanSuite extends FunSuite {
-	trait TestTrees {
-		val t1 = Fork(Leaf('a',2), Leaf('b',3), List('a','b'), 5)
-		val t2 = Fork(Fork(Leaf('a',2), Leaf('b',3), List('a','b'), 5), Leaf('d',4), List('a','b','d'), 9)
-	}
+
+  trait TestTrees {
+    val t1 = Fork(Leaf('a', 2), Leaf('b', 3), List('a', 'b'), 5)
+    val t2 = Fork(Fork(Leaf('a', 2), Leaf('b', 3), List('a', 'b'), 5), Leaf('d', 4), List('a', 'b', 'd'), 9)
+  }
 
 
   test("weight of a larger tree") {
@@ -21,13 +22,29 @@ class HuffmanSuite extends FunSuite {
     }
   }
 
-
-  test("chars of a larger tree") {
+  test("weight of a even larger tree") {
     new TestTrees {
-      assert(chars(t2) === List('a','b','d'))
+      assert(weight(t2) === 9)
     }
   }
 
+  test("chars of a larger tree") {
+    new TestTrees {
+      assert(chars(t2) === List('a', 'b', 'd'))
+    }
+  }
+
+  test("test times") {
+    val counts: List[(Char, Int)] = times(List('a', 'b', 'a'))
+    assert(counts.find(x => x._1 == 'a').get._2 == 2)
+    assert(counts.find(x => x._1 == 'b').get._2 == 1)
+  }
+
+  test("test times longstring") {
+    val counts: List[(Char, Int)] = times(string2Chars("hello, world"))
+    assert(counts.find(x => x._1 == 'l').get._2 == 3)
+    assert(counts.find(x => x._1 == 'w').get._2 == 1)
+  }
 
   test("string2chars(\"hello, world\")") {
     assert(string2Chars("hello, world") === List('h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd'))
@@ -35,15 +52,27 @@ class HuffmanSuite extends FunSuite {
 
 
   test("makeOrderedLeafList for some frequency table") {
-    assert(makeOrderedLeafList(List(('t', 2), ('e', 1), ('x', 3))) === List(Leaf('e',1), Leaf('t',2), Leaf('x',3)))
+    assert(makeOrderedLeafList(List(('t', 2), ('e', 1), ('x', 3))) === List(Leaf('e', 1), Leaf('t', 2), Leaf('x', 3)))
   }
 
 
   test("combine of some leaf list") {
     val leaflist = List(Leaf('e', 1), Leaf('t', 2), Leaf('x', 4))
-    assert(combine(leaflist) === List(Fork(Leaf('e',1),Leaf('t',2),List('e', 't'),3), Leaf('x',4)))
+    assert(combine(leaflist) === List(Fork(Leaf('e', 1), Leaf('t', 2), List('e', 't'), 3), Leaf('x', 4)))
   }
 
+
+  test("decode tree2 abad") {
+    new TestTrees {
+      assert(decode(t2, "0001001".toList.map(c => Integer.parseInt(c.toString))) === "abad".toList)
+    }
+  }
+
+  test("encode tree2 0001001") {
+    new TestTrees {
+      assert(encode(t2)("abad".toList) === "0001001".toList.map(c => Integer.parseInt(c.toString)))
+    }
+  }
 
   test("decode and encode a very short text should be identity") {
     new TestTrees {
@@ -51,4 +80,21 @@ class HuffmanSuite extends FunSuite {
     }
   }
 
+  test("decode secret") {
+    System.out.println(decodedSecret)
+
+  }
+
+  test("convert") {
+    new TestTrees {
+      convert(t2)
+    }
+  }
+
+  test("createCodeTree(someText)") {
+    val tree = createCodeTree("someText".toList)
+    assert(weight(tree) == 10)
+    val res = encode(tree)("someText".toList)
+    assert(res.length == 36)
+  }
 }
